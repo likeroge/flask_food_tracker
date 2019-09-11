@@ -1,22 +1,23 @@
-from flask import Flask, render_template, g
+from flask import Flask, render_template, g, request
 import sqlite3
+
 
 app = Flask(__name__)
 
-def connec_db():
-    sql = sqlite3.connect("D:\Progs\sqlite\food_log.db")
+def connect_db():
+    sql = sqlite3.connect('/home/egor/Документы/Programming/Python/DB/food_log.db')
     sql.row_factory = sqlite3.Row
     return sql
 
 def get_db():
     if not hasattr(g, 'sqlite3_db'):
-        g.sqlite3_db = connec_db()
-    return g.sqlite3_db
+        g.sqlite_db = connect_db()
+    return g.sqlite_db
 
 @app.teardown_appcontext
-def close_db(err):
-    if hasattr(g, 'sqlite3_db'):
-        g.sqlite3_db.close()
+def close_db(error):
+    if hasattr(g, 'sqlite_db'):
+        g.sqlite_db.close()
 
 @app.route("/")
 def index():
@@ -26,9 +27,25 @@ def index():
 def view():
    return render_template('day.html')
 
-@app.route("/food")
+@app.route("/food", methods=['GET', 'POST'])
 def food():
-    return render_template('add_food.html')
+    db = get_db()
+    if request.method == 'POST':
+        name = request.form['food-name']
+        protein = int(request.form['protein'])
+        carbohydrates = int(request.form['carbohydrates'])
+        fat = int(request.form['fat'])
+
+        calories = protein*4+carbohydrates*+fat*9
+       
+        
+        db.execute('insert into food (name, protein, carbohydrate, fat, calories) values (?, ?, ?, ?, ?)', [name, protein, carbohydrates, fat, calories])
+        db.commit()
+    
+    cursor = db.execute('select name, protein, carbohydrate, fat, calories from food')
+    results = cursor.fetchall()
+        
+    return render_template('add_food.html', results=results)
 
 if __name__ == '__main__':
     app.run(debug=True)

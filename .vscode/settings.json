@@ -1,0 +1,6 @@
+{
+    "python.pythonPath": "/home/egor/Документы/Programming/Python/Flask/food_tracker/flask_food_tracker/venv/bin/python3.6",
+    "python.linting.pylintEnabled": false,
+    "python.linting.pep8Enabled": true,
+    "python.linting.enabled": true
+}
